@@ -7,12 +7,6 @@ output: html_document
 
 ### Load the libraries
 
-Make a function that:
-- runs the random effects, CIs and reports them
-- add the fixed effects, CIs and reports them
-- tests for influential studies
-- tests for publication bias
-
 
 ```{r}
 library(pacman)
@@ -116,12 +110,6 @@ IntensityMean=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=IntensityMeanASD_Mean, m2i=
 ### Meta-Analysis of mean pitch
 
 ```{r}
-
-#Make a function that:
-#- runs the random effects, CIs and reports them
-#- add the fixed effects, CIs and reports them
-#- tests for influential studies
-#- tests for publication bias
 
 # Random Effects Model
 res <- rma(yi, vi, data = PitchMean, slab=Paper)

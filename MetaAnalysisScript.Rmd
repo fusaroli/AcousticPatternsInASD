@@ -1,0 +1,274 @@
+---
+title: "ASD Review - Meta-Analysis"
+author: "Riccardo Fusaroli"
+date: "October 23, 2015"
+output: html_document
+---
+
+### Load the libraries
+
+Make a function that:
+- runs the random effects, CIs and reports them
+- add the fixed effects, CIs and reports them
+- tests for influential studies
+- tests for publication bias
+
+
+```{r}
+library(pacman)
+p_load('metafor','robumeta','ggplot2','boot') 
+# Note that mada and metafor cannot be loaded at the same time! Conflicting "forest" functions
+
+MetaAnalysis <- function(data) {
+  # Random Effects Model
+  res <- rma(yi, vi, data = PitchMean, slab=Paper)
+  # Producing Random Effects Estimates
+  res
+  predict(res, digits=3)
+  confint(res)
+  forest(res)
+  
+  # Mixed effects models
+  res.Population <- rma(yi, vi, mods = cbind(factor(Population)), data = PitchMean, slab=Paper)
+  res.Population
+  confint(res.Population)
+  forest(res.Population)
+  res.Task <- rma(yi, vi, mods = cbind(Task), data = PitchMean, slab=Paper)
+  res.Task
+  confint(res.Task)
+  forest(res.Task)
+  res.Language <- rma(yi, vi, mods = cbind(as.factor(Language)), data = PitchMean, slab=Paper)
+  res.Language
+  confint(res.Language)
+  forest(res.Language)
+  
+  # Testing for influential studies
+  inf <- influence(res)
+  print(inf)
+  plot(inf)
+  baujat(res)
+  
+  # Clean results
+  res_clean<- rma(yi, vi, data = PitchMean[c(1,3:8),], slab=Paper)
+  res_clean
+  predict(res_clean,digits=3)
+  confint(res_clean)
+  
+  ### funnel plot
+  funnel(res, main = "Random-Effects Model",xlab = "Standardized Mean Difference")
+  #Tests for publication bias
+  regtest(res)
+  ranktest(res)
+  
+  ### Trim and fill method
+  res.tf <- trimfill(res)
+  res.tf
+  funnel(res.tf, xlab = "Standardized Mean Difference")
+  }
+
+
+boot.func <- function(data.boot) {
+ 
+   res <- try(rma(yi, vi, data=data.boot), silent=TRUE)
+ 
+   if (is.element("try-error", class(res))) {
+      NA
+   } else {
+      c(coef(res), vcov(res), res$tau2, res$se.tau2^2)
+   }
+ 
+}
+data.gen <- function(dat, mle) {
+   data.frame(yi=rnorm(nrow(dat), mle$mu, sqrt(mle$tau2 + dat$vi)), vi=dat$vi)
+}
+
+```
+
+### Load the Data
+
+```{r}
+
+UniData=read.csv('UnivariateData.csv')
+MultiData=read.csv('MultivariateData.csv')
+
+```
+
+
+## Meta-analysis of the uni-variate studies
+
+Three relevant (> 2 studies variables)
+
+- Mean Pitch
+
+- Pitch Range
+
+- Intensity Mean
+
+```{r}
+### Calculate the effect sizes for the three relevant (>2 studies) variables:
+
+PitchMean=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=PitchMeanASD_Mean, m2i=PitchMeanTD_Mean, sd1i=PitchMeanASD_SD, sd2i=PitchMeanTD_SD, data = UniData)
+PitchRange=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=PitchRangeASD_Mean, m2i=PitchRangeTD_Mean, sd1i=PitchRangeASD_SD, sd2i=PitchRangeTD_SD, data = UniData)
+IntensityMean=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=IntensityMeanASD_Mean, m2i=IntensityMeanTD_Mean, sd1i=IntensityMeanASD_SD, sd2i=IntensityMeanTD_SD, data = UniData)
+
+```
+
+### Meta-Analysis of mean pitch
+
+```{r}
+
+#Make a function that:
+#- runs the random effects, CIs and reports them
+#- add the fixed effects, CIs and reports them
+#- tests for influential studies
+#- tests for publication bias
+
+# Random Effects Model
+res <- rma(yi, vi, data = PitchMean, slab=Paper)
+# Producing Random Effects Estimates
+res
+predict(res, digits=3)
+confint(res)
+forest(res)
+
+# Mixed effects models
+res.Task <- rma(yi, vi, mods = cbind(Task), data = PitchMean, slab=Paper)
+res.Task
+confint(res.Task)
+forest(res.Task)
+res.Language <- rma(yi, vi, mods = cbind(as.factor(Language)), data = PitchMean, slab=Paper)
+res.Language
+confint(res.Language)
+forest(res.Language)
+
+# Testing for influential studies
+inf <- influence(res)
+print(inf)
+plot(inf)
+
+# Recalculating without influential studies
+res_clean<- rma(yi, vi, data = PitchMean[-1,], slab=Paper)
+res_clean
+predict(res_clean,digits=3)
+confint(res_clean)
+
+### funnel plot
+funnel(res, main = "Random-Effects Model",xlab = "Standardized Mean Difference")
+#Tests for publication bias
+regtest(res)
+ranktest(res)
+
+### Trim and fill method
+res.tf <- trimfill(res)
+res.tf
+funnel(res.tf, xlab = "Standardized Mean Difference")
+
+```
+
+### Meta-Analysis of pitch range
+
+```{r}
+# Random Effects Model
+res <- rma(yi, vi, data = PitchRange, slab=Paper)
+# Producing Random Effects Estimates
+res
+predict(res, digits=3)
+confint(res)
+forest(res)
+
+# Mixed effects models
+res.Task <- rma(yi, vi, mods = cbind(Task), data = PitchRange, slab=Paper)
+res.Task
+confint(res.Task)
+forest(res.Task)
+res.Language <- rma(yi, vi, mods = cbind(as.factor(Language)), data = PitchRange, slab=Paper)
+res.Language
+confint(res.Language)
+forest(res.Language)
+
+# Testing for influential studies
+inf <- influence(res)
+print(inf)
+plot(inf)
+
+### funnel plot
+funnel(res, main = "Random-Effects Model",xlab = "Standardized Mean Difference")
+#Tests for publication bias
+regtest(res)
+ranktest(res)
+
+### Trim and fill method
+res.tf <- trimfill(res)
+res.tf
+funnel(res.tf, xlab = "Standardized Mean Difference")
+
+```
+
+### Meta-Analysis of mean intensity
+
+```{r}
+
+# Random Effects Model
+res <- rma(yi, vi, data = IntensityMean, slab=Paper)
+# Producing Random Effects Estimates
+res
+predict(res, digits=3)
+confint(res)
+forest(res)
+
+# Mixed effects models
+res.Task <- rma(yi, vi, mods = cbind(Task), data = IntensityMean, slab=Paper)
+res.Task
+confint(res.Task)
+forest(res.Task)
+res.Language <- rma(yi, vi, mods = cbind(as.factor(Language)), data = IntensityMean, slab=Paper)
+res.Language
+confint(res.Language)
+forest(res.Language)
+
+# Testing for influential studies
+inf <- influence(res)
+print(inf)
+plot(inf)
+
+### funnel plot
+funnel(res, main = "Random-Effects Model",xlab = "Standardized Mean Difference")
+#Tests for publication bias
+regtest(res)
+ranktest(res)
+
+### Trim and fill method
+res.tf <- trimfill(res)
+res.tf
+funnel(res.tf, xlab = "Standardized Mean Difference")
+
+```
+
+## Meta-Analysis of the Multivariate Machine Learning studies
+
+```{r}
+p_unload(metafor)
+p_load(mada)
+Data=MultiData[!is.na(MultiData$TN),]
+
+txt="Meta-analytic statistics of the multi-variate machine-learning studies, taken at face value"
+cat(txt)
+
+madad(Data)
+txt="Forest plot of sensitivity"
+cat(txt)
+forest(madad(Data), type = "sens",snames=Data$Paper,xlab="Sensitivity")
+txt="Forest plot of specificity"
+cat(txt)
+forest(madad(Data), type = "spec",snames=Data$Paper,xlab="Specificity")
+
+
+# Calculating models with different factors to compare (e.g. does task explain some of the variance?)
+InterceptModel = reitsma(Data, formula = cbind(tsens, tfpr) ~ 1, method = "ml")
+TaskModel <- reitsma(Data, formula = cbind(tsens, tfpr) ~ factor(Task), method = "ml")
+LanguageModel <- reitsma(Data, formula = cbind(tsens, tfpr) ~ factor(Language), method = "ml")
+
+# Comparisons
+anova(InterceptModel,TaskModel)
+anova(InterceptModel,LanguageModel)
+```

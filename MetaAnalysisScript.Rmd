@@ -55,7 +55,7 @@ Three relevant (> 2 studies variables)
 
 PitchMean=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=PitchMeanASD_Mean, m2i=PitchMeanTD_Mean, sd1i=PitchMeanASD_SD, sd2i=PitchMeanTD_SD, data = UniData)
 PitchRange=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=PitchRangeASD_Mean, m2i=PitchRangeTD_Mean, sd1i=PitchRangeASD_SD, sd2i=PitchRangeTD_SD, data = UniData)
-#IntensityMean=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=IntensityMeanASD_Mean, m2i=IntensityMeanTD_Mean, sd1i=IntensityMeanASD_SD, sd2i=IntensityMeanTD_SD, data = UniData)
+IntensityMean=escalc('SMD', n1i=ASD_N, n2i=TD_N, m1i=IntensityMeanASD_Mean, m2i=IntensityMeanTD_Mean, sd1i=IntensityMeanASD_SD, sd2i=IntensityMeanTD_SD, data = UniData)
 
 ```
 

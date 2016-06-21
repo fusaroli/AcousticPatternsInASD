@@ -27,7 +27,7 @@ boot.func <- function(data.boot) {
 data.gen <- function(dat, mle) {
    data.frame(yi=rnorm(nrow(dat), mle$mu, sqrt(mle$tau2 + dat$vi)), vi=dat$vi)
 }
-
+options(stringsAsFactors = FALSE)
 ```
 
 ### Load the Data
@@ -35,6 +35,7 @@ data.gen <- function(dat, mle) {
 ```{r}
 
 UniData=read.csv('UnivariateData.csv')
+UniData$Task=as.factor(UniData$Task)
 MultiData=read.csv('MultivariateData.csv')
 
 ```
